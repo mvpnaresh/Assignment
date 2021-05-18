@@ -1,0 +1,93 @@
+﻿@page "/movieslisting"
+
+@using Assignment.BlazorServerMovieApp.Data.Movie
+@inject IMovieService movieService
+@inject NavigationManager navigationService
+
+<h3>Movies Listing</h3>
+
+@if (moviesListing == null || moviesListing.Count() == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row" style="padding-top:10px; padding-bottom:10px">
+        <div class="col-md-4">
+            <select class="form-control" @bind="selectedLocation">
+                <option value=""> Select Location </option>
+                @foreach (var location in Locations)
+                {
+                    <option value="@location">@location</option>
+
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-control" @bind="selectedLanguage">
+                <option value=""> Select Languages </option>
+                @if (Languages != null)
+                {
+                    @foreach (var language in Languages)
+                    {
+                        <option value="@language">@language</option>
+
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div>
+        <div class="card-columns mx-auto">
+            @foreach (var movie in FilteredMovies)
+            {
+                if (!IsVisible(movie))
+                    continue;
+                <div class="card border-info mb-3" style="max-width: 18rem;" @onclick="@(e => NavigateToMovie(e, movie.ImdbID))">
+                    <img class="card-img-top" src="@movie.Poster" alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Title</h5>
+                        <a href="" class="stretched-link" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<Entity.Movie> moviesListing;
+    private IEnumerable<string> Locations;
+    private IEnumerable<string> Languages;
+    private IEnumerable<Entity.Movie> FilteredMovies;
+    string selectedLanguage;
+    string selectedLocation;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        moviesListing = await movieService.GetMovies();
+        Locations = await movieService.GetLocations();
+        Languages = await movieService.GetLanguages();
+        FilteredMovies = moviesListing;
+    }
+
+    private bool IsVisible(Entity.Movie movie)
+    {
+        if (string.IsNullOrEmpty(selectedLanguage) && string.IsNullOrEmpty(selectedLocation))
+            return true;
+        else if (movie.Language.Equals(selectedLanguage) && movie.Location.Equals(selectedLocation))
+            return true;
+        else if (string.IsNullOrEmpty(selectedLanguage) && movie.Location.Equals(selectedLocation))
+            return true;
+        else if (movie.Language.Equals(selectedLanguage) && string.IsNullOrEmpty(selectedLocation))
+            return true;
+
+        return false;
+    }
+
+    private void NavigateToMovie(MouseEventArgs e, string imdbId)
+    {
+        navigationService.NavigateTo($"/movie/{imdbId}");
+    }
+}

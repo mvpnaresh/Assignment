@@ -1,0 +1,46 @@
+﻿@page "/movie/{imdbId}"
+@using Assignment.BlazorServerMovieApp.Data.Movie
+@inject IMovieService movieService
+@inject NavigationManager navigationService
+
+@if (movie == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row" style="padding-top:10px; padding-bottom:10px">
+        <button type="button" class="btn btn-primary btn-arrow-left" @onclick="NavigateBack">Go Back</button>
+    </div>
+
+    <div class="jumbotron jumbotron-fluid">
+
+        <picture>
+            <source media="(min-width:800px)" srcset="@movie.Poster">
+            <img src="@movie.Poster" alt="Bootstrap 4 jumbotron with Image Tag Background vs CSS background image for SEO" class="jumbotron__background">
+        </picture>
+
+        <div class="container text-white">
+            <h1 class="display-4">@movie.Title</h1>
+            <p class="lead">@movie.Plot</p>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public string imdbId { get; set; }
+    private Entity.Movie movie;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movie = await movieService.GetMovieById(imdbId);
+    }
+
+    private void NavigateBack()
+    {
+        navigationService.NavigateTo("movieslisting");
+    }
+
+}
