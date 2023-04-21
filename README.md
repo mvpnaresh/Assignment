@@ -1,4 +1,4 @@
-# Assignment
+# Movies API - Assignment
 
 To use the solution,
 1. Clone using visual studio or download the zip file and extract the contents.
